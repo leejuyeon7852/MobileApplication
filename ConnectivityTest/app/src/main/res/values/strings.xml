@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ConnectivityTest</string>
+    <string name="cs_url">https://cs.dongduk.ac.kr</string>
+    <string name="server_url">"https://httpbin.org/post"</string>
+    <string name="image_url">https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2tuoLt3wVnUbbmP40JbeBLcqHJ1dWO8Tfgw&amp;usqp=CAU</string>
+    <string name="movie_url">https://kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.xml?key=35e9ad71e071357ccdc804ea4ae48511&amp;targetDt=</string>
+</resources>
