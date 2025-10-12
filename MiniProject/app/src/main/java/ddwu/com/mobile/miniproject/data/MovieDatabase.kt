@@ -12,7 +12,7 @@ abstract class MovieDatabase : RoomDatabase() {
     companion object{
         @Volatile private var INSTANCE: MovieDatabase?=null
 
-        fun getDatabase(context: Context): MovieDatabase{
+        fun getInstance(context: Context): MovieDatabase{
             return INSTANCE?: synchronized(this){
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
