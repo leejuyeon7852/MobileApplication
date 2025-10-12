@@ -10,7 +10,7 @@ data class Root(
 data class BoxOfficeResult(
     val boxofficeType: String,
     val showRange: String,
-    val dailyBoxOfficeMovie: List<DailyBoxOfficeMovie>,
+    val dailyBoxOfficeList: List<DailyBoxOfficeMovie>,
 )
 
 data class DailyBoxOfficeMovie(
