@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-//    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp")
 }
 android {
     namespace = "ddwu.com.mobile.miniproject"
@@ -45,12 +45,12 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    /*val room_version = "2.7.2"
+    val room_version = "2.7.2"
     implementation("androidx.room:room-runtime:${room_version}")
     annotationProcessor("androidx.room:room-compiler:${room_version}")
-    ksp("androidx.room:room-compiler:$room_version")*/
+    ksp("androidx.room:room-compiler:$room_version")
 
-    /*val retrofit_version = "3.0.0"  // Retrofit
+    val retrofit_version = "3.0.0"  // Retrofit
     implementation("com.squareup.retrofit2:retrofit:${retrofit_version}")
     implementation("com.squareup.retrofit2:converter-gson:${retrofit_version}")
     implementation("com.github.bumptech.glide:glide:4.16.0") // Glide*/
