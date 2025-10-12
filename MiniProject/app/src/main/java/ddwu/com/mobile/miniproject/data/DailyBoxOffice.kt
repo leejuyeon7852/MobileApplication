@@ -15,12 +15,14 @@ data class BoxOfficeResult(
 
 data class DailyBoxOfficeMovie(
     val rank: String,
-    @SerializedName("movieNm")
-    val title: String,
-    @SerializedName("openDt")
-    val openDate: String,
+    @SerializedName("movieNm") val title: String,
+    @SerializedName("openDt") val openDate: String,
     val audiAcc: String, // 총 누적 관객 수
     val scrnCnt: String, // 총 상연관 수
 ) : Serializable{
     override fun toString() = "$rank : $title (누적 $audiAcc 명)"
+}
+
+fun DailyBoxOfficeMovie.toMovieEntity() : MovieEntity {
+    return MovieEntity(0, title, openDate)
 }
