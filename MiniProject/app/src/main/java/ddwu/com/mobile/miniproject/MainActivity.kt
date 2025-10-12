@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                     resources.getString(R.string.movie_key),
                     binding.etDate.text.toString()
                 )
-                adapter.items = root.boxOfficeResult.dailyBoxOfficeList  /*root 객체로부터 List 객체 추출*/
+                adapter.items = root.boxOfficeResult.dailyBoxOfficeMovie  /*root 객체로부터 List 객체 추출*/
                 adapter.notifyDataSetChanged()
             }
         }
