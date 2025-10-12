@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">MiniProject</string>
     <string name="movie_url">https://www.kobis.or.kr/</string>
-    <string name="movie_key">30f342ccf96e2c1cbf2b4f1aa1aa2fda</string>
+    <string name="movie_key">35e9ad71e071357ccdc804ea4ae48511</string>
     <string name="image_url">https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS2tuoLt3wVnUbbmP40JbeBLcqHJ1dWO8Tfgw&amp;usqp=CAU</string>
 </resources>
