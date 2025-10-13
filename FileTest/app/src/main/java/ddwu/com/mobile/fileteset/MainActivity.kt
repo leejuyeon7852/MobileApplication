@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
             // 방법 1 - 자바 기본
             val writeFile = File(filesDir, "output_text.txt")
+            //val writeFile = File(filesDir/"images", "output_text.txt")
             val outputStream = FileOutputStream(writeFile)
 
             outputStream.write(writeText.toByteArray())
@@ -80,11 +81,23 @@ class MainActivity : AppCompatActivity() {
                 // subDir.mkdirs() // 상위 dir이 없으면 함게 생성
             }
 
-            val pathname = "/data/data/ddwu.com.mobile.fileteset"
-            val parentDir = File(pathname, "parent")
-            if (!parentDir.exists()){
-                parentDir.mkdir()
+//            val pathname = "/data/data/ddwu.com.mobile.fileteset"
+//            val parentDir = File(pathname, "parent")
+//            if (!parentDir.exists()){
+//                parentDir.mkdir()
+//            }
+        }
+
+        binding.btnListNDel.setOnClickListener {
+            // 파일 목록
+            var fileList = filesDir.listFiles()
+            if (fileList!=null){
+                for (file in fileList){
+                    Log.d(TAG, "파일 목록 : ${file.name}")
+                }
             }
+            // 파일 삭제
+            deleteFile("output_text.txt")
         }
     }
 }
