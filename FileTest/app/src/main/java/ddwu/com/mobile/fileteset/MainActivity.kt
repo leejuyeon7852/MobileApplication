@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        binding.btnWriteText.setOnClickListener {
+        binding.btnWriteText.setOnClickListener { //파일 쓰기
             var writeText = "모바일 응용"
 
             // 방법 1 - 자바 기본
