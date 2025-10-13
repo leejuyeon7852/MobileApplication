@@ -79,6 +79,12 @@ class MainActivity : AppCompatActivity() {
                 subDir.mkdir()
                 // subDir.mkdirs() // 상위 dir이 없으면 함게 생성
             }
+
+            val pathname = "/data/data/ddwu.com.mobile.fileteset"
+            val parentDir = File(pathname, "parent")
+            if (!parentDir.exists()){
+                parentDir.mkdir()
+            }
         }
     }
 }
