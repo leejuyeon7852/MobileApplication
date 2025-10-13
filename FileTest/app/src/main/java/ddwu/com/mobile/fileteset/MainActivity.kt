@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
             var writeText = "모바일 응용"
 
             // 방법 1 - 자바 기본
-            val writeFile = File(filesDir, "ouput_text.txt")
+            val writeFile = File(filesDir, "output_text.txt")
             val outputStream = FileOutputStream(writeFile)
 
             outputStream.write(writeText.toByteArray())
@@ -51,14 +51,14 @@ class MainActivity : AppCompatActivity() {
 
             writeText = "Mobile Application"
             // 방법 2
-            openFileOutput("ouput_text.txt", MODE_APPEND).use{
+            openFileOutput("output_text.txt", MODE_APPEND).use{
                 it.write(writeText.toByteArray())
             }
         }
 
         binding.btnReadText.setOnClickListener { // 파일 읽기
             //방법 1 - 자바 기본
-            val readFile = File(filesDir, "ouput_text.txt")
+            val readFile = File(filesDir, "output_text.txt")
 
             val fileReader = FileReader(readFile)
             BufferedReader(fileReader).useLines { lines ->
