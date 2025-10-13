@@ -72,5 +72,13 @@ class MainActivity : AppCompatActivity() {
                 lines -> lines.forEach { Log.d(TAG, "파일 문자열: ${it}") }
             }
         }
+
+        binding.btnCreateSubDir.setOnClickListener {
+            val subDir = File(filesDir, "images")
+            if (!subDir.exists()){
+                subDir.mkdir()
+                // subDir.mkdirs() // 상위 dir이 없으면 함게 생성
+            }
+        }
     }
 }
