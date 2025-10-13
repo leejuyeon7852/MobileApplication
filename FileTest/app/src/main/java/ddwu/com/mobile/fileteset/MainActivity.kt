@@ -1,11 +1,16 @@
 package ddwu.com.mobile.fileteset
 
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import ddwu.com.mobile.fileteset.databinding.ActivityMainBinding
 import java.io.BufferedReader
 import java.io.File
@@ -98,6 +103,33 @@ class MainActivity : AppCompatActivity() {
             }
             // 파일 삭제
             deleteFile("output_text.txt")
+        }
+
+
+        binding.btnImage.setOnClickListener {
+            val imageUrl = "https://image.zeta-ai.io/profile-image/406995b4-06d2-4d5e-9dda-8c2f3ccd2ce6/52916206-b3aa-4602-aacf-b5f4951b8c77.jpeg?w=3840&q=90&f=webp"
+            Glide.with(this)
+                .asBitmap()
+                .load(imageUrl)
+                .into(
+                    object : CustomTarget<Bitmap>(350, 350){
+                        override fun onResourceReady(
+                            resource: Bitmap,
+                            transition: Transition<in Bitmap>?
+                        ) {
+                            val imageFile = File("${filesDir}/images", "image.jpg")
+                            val fos = FileOutputStream(imageFile)
+                            resource.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                            fos.close()
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            Log.d(TAG, "Image load cleared!")
+                        }
+
+                    }
+//                  binding.imageView
+                )
         }
     }
 }
