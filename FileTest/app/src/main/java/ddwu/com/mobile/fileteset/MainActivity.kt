@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ddwu.com.mobile.fileteset.databinding.ActivityMainBinding
+import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.io.FileReader
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        binding.btnWriteText.setOnClickListener { //파일 쓰기
+        binding.btnWriteText.setOnClickListener { // 파일 쓰기
             var writeText = "모바일 응용"
 
             // 방법 1 - 자바 기본
@@ -49,8 +51,25 @@ class MainActivity : AppCompatActivity() {
 
             writeText = "Mobile Application"
             // 방법 2
-            openFileOutput("ouput_text.txt", MODE_PRIVATE).use{
+            openFileOutput("ouput_text.txt", MODE_APPEND).use{
                 it.write(writeText.toByteArray())
+            }
+        }
+
+        binding.btnReadText.setOnClickListener { // 파일 읽기
+            //방법 1 - 자바 기본
+            val readFile = File(filesDir, "ouput_text.txt")
+
+            val fileReader = FileReader(readFile)
+            BufferedReader(fileReader).useLines { lines ->
+                for (line in lines){
+                    Log.d(TAG, "파일 문자열: ${line}")
+                }
+            }
+
+            // 방법 2
+            openFileInput("output_text.txt").bufferedReader().useLines{
+                lines -> lines.forEach { Log.d(TAG, "파일 문자열: ${it}") }
             }
         }
     }
