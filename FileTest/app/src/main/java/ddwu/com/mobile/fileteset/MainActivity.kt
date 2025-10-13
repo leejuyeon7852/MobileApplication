@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ddwu.com.mobile.fileteset.databinding.ActivityMainBinding
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +35,23 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "외부 저장소 기본 파일 경로: ${getExternalFilesDir(null)}")
             Log.d(TAG, "외부 저장소 캐시 파일 경로: ${externalCacheDir}")
 
+        }
+
+        binding.btnWriteText.setOnClickListener {
+            var writeText = "모바일 응용"
+
+            // 방법 1 - 자바 기본
+            val writeFile = File(filesDir, "ouput_text.txt")
+            val outputStream = FileOutputStream(writeFile)
+
+            outputStream.write(writeText.toByteArray())
+            outputStream.close()
+
+            writeText = "Mobile Application"
+            // 방법 2
+            openFileOutput("ouput_text.txt", MODE_PRIVATE).use{
+                it.write(writeText.toByteArray())
+            }
         }
     }
 }
