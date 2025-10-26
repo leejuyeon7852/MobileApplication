@@ -22,6 +22,8 @@ class DetailActivity : AppCompatActivity() {
     lateinit var detailBinding: ActivityDetailBinding
     val TAG = "DetailActivity"
 
+    private var savedImageFile: File? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,6 +39,12 @@ class DetailActivity : AppCompatActivity() {
 
         val item = intent.getSerializableExtra("book") as Book
 
+        Glide.with(this)
+            .load(item.image)
+            .placeholder(R.drawable.ic_launcher_foreground)
+            .error(R.drawable.ic_launcher_background)
+            .into(detailBinding.imageView2)
+
         detailBinding.btnSaveImage.setOnClickListener {
             Glide.with(this)
                 .asBitmap()
@@ -46,9 +54,13 @@ class DetailActivity : AppCompatActivity() {
                         override fun onResourceReady(
                             resource: Bitmap,
                             transition: Transition<in Bitmap>?
-                        ) { // image 파일 경로 생성 후에
-                            val imageFile = File("${filesDir}/images","${getCurrentTime()}.jpg")
-                            val fos = FileOutputStream(imageFile)
+                        ) {
+                            val imageDir = File(filesDir, "images")
+                            if (!imageDir.exists()) imageDir.mkdirs()
+
+                            // image 파일 경로 생성 후에
+                            savedImageFile = File(imageDir,"${getCurrentTime()}.jpg")
+                            val fos = FileOutputStream(savedImageFile)
 
                             resource.compress(Bitmap.CompressFormat.JPEG, 100, fos)
                             fos.close()
@@ -62,7 +74,14 @@ class DetailActivity : AppCompatActivity() {
                 )
         }
         detailBinding.btnClose.setOnClickListener {
-//            deleteFile()
+            var imageDir = File(filesDir, "images")
+            var fileList = imageDir.listFiles()
+
+            if(fileList!=null){
+                for(file in fileList){
+                    file.delete()
+                }
+            }
         }
 
     }

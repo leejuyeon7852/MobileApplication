@@ -20,6 +20,6 @@ data class Book(
     val pubdate: String,
     val isbn: String,
     val description: String,
-) {
+): Serializable {
    override fun toString()= "$title ($author)"
 }
