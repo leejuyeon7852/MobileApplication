@@ -3,6 +3,8 @@ package ddwu.com.mobile.notitest
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +12,8 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,6 +37,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        createNotificationChannel()
 
         binding.btnNoti.setOnClickListener {
             Thread {
@@ -73,6 +79,27 @@ class MainActivity : AppCompatActivity() {
     private fun showNotification() {
         checkNotificationPermission()
         // Notification 실행 구현
+        val intent = Intent(this, AlertActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        val channerId = resources.getString(R.string.channel_id)
+
+        var newNoti = NotificationCompat.Builder(this, channerId)
+            .setSmallIcon(R.drawable.ic_stat_name)
+            .setContentTitle("알림 제목")
+            .setContentText("짧은 알림 내용")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("확장시 확인할 수 있는 긴 알림 내용"))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        val notiManager = NotificationManagerCompat.from(this)
+        notiManager.notify(100, newNoti)
 
     }
 
@@ -80,6 +107,27 @@ class MainActivity : AppCompatActivity() {
     private fun showNotificationWithAction() {
         checkNotificationPermission()
         // Notification 실행 (action 버튼 사용) 구현
+        val intent = Intent(this, AlertBReceiver::class.java).apply {
+            action = "ACTION_SNOOZE"
+            putExtra("NOTI_ID", 200)
+        }
+
+        val pendingIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE)
+
+        val channerID = resources.getString(R.string.channel_id)
+        var builder = NotificationCompat.Builder(this, channerID)
+            .setSmallIcon(R.drawable.ic_stat_name)
+            .setContentTitle("알림 제목")
+            .setContentText("짧은 알림 내용")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("확장시 확인할 수 있는 긴 알림 내용"))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .addAction(R.drawable.ic_stat_name, "쉬기", pendingIntent)
+
+        val notiManager = NotificationManagerCompat.from(this)
+        notiManager.notify(100, builder.build())
 
     }
 
