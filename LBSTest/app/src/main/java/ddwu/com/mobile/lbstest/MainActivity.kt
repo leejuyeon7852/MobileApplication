@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import ddwu.com.mobile.lbstest.databinding.ActivityMainBinding
-//import com.google.android.gms.location.*
+import com.google.android.gms.location.*
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
