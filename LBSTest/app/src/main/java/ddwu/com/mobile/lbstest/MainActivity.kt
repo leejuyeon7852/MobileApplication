@@ -44,19 +44,29 @@ class MainActivity : AppCompatActivity() {
 
         checkPermissions()      // 위치 요청 권한 확인
 
-        fusedLocationClient =
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        locationRequest =
+        locationRequest = LocationRequest.Builder(5000)
+            .setMinUpdateIntervalMillis(3000)
+            .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            .build()
 
-        locationCallback =
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                val currentLoc: Location = locationResult.locations[0]
+                Log.d(TAG, "위도: ${currentLoc.latitude}, 경도: ${currentLoc.longitude}")
+            }
+        }
 
 
         binding.btnStart.setOnClickListener {
             // 위치 조사 시작
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         }
 
         binding.btnStop.setOnClickListener {
             // 위치 조사 종료
+            fusedLocationClient.removeLocationUpdates(locationCallback)
         }
 
         binding.btnLastLoc.setOnClickListener {
@@ -64,10 +74,16 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnGeo.setOnClickListener {
             // Geocoding 실행
+            geocoder.getFromLocationName("동덕여자대학교", 1){
+                address -> binding.etAddress.setText("${address[0].latitude}, ${address[0].longitude}")
+            } //3번째 매개변수로 람다함수가 들어가는 거임
         }
 
         binding.btnReverseGeo.setOnClickListener {
             // Reverse geocoding 실행
+            geocoder.getFromLocation(37.606358, 127.041822, 5){
+                addresses -> binding.etAddress.setText("${addresses.get(0).getAddressLine(0)}")
+            }
         }
 
         binding.btnMap.setOnClickListener {
@@ -79,11 +95,18 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         // 위치 조사 종료
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     /*최종 위치 확인*/
     private fun getLastLocation() {
-
+        fusedLocationClient.lastLocation.addOnSuccessListener {
+            location: Location? ->
+            Log.d(TAG, "최종 위치 확인: ${location?.latitude}, ${location?.longitude}")
+        }
+        fusedLocationClient.lastLocation.addOnFailureListener {
+            Log.d(TAG, "최종 위치 확인 실패")
+        }
     }
 
     /*외주 지도 앱 호출*/
