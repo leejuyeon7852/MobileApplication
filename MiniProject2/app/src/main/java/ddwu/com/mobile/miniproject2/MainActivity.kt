@@ -109,6 +109,8 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this@MainActivity, LocationDetailActivity::class.java)
 
             /*Intent에 위도 경도 추가*/
+            intent.putExtra("lat", centerMarker.position.latitude)
+            intent.putExtra("lng", centerMarker.position.longitude)
 
             startActivity(intent)
         }
