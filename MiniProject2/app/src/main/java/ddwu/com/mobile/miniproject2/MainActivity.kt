@@ -5,6 +5,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -14,6 +15,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.GeneratedAdapter
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import ddwu.com.mobile.miniproject2.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +41,14 @@ class MainActivity : AppCompatActivity() {
 
     val TAG = "MINI_PROJECT"
     val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+    lateinit var googleMap: GoogleMap
+    //위치 서비스 구현
+    lateinit var fusedLocationClient: FusedLocationProviderClient
+    lateinit var locationRequest: LocationRequest
+    lateinit var locationCallback: LocationCallback
+
+    //마커
+    lateinit var centerMarker: Marker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,11 +63,11 @@ class MainActivity : AppCompatActivity() {
         /*위치 확인 관련 코드 작성*/
 
 
-
         /*구글 지도 객체 로딩 코드 작성*/
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(mapReadyCallback)
 
-
-
+        //현재 위치
         binding.btnCurrentLoc.setOnClickListener {
 
         }
@@ -81,27 +104,70 @@ class MainActivity : AppCompatActivity() {
 
         // 실행 시 위치서비스 관련 권한 확인
         checkPermissions()
+
+        //위치 서비스 구현
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        locationRequest = LocationRequest.Builder(5000)
+            .setMinUpdateIntervalMillis(3000)
+            .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            .build()
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                val currentLoc : Location = locationResult.locations[0]
+                Log.d(TAG, "위도:${currentLoc.latitude} 경도: ${currentLoc.longitude}")
+            }
+        }
     }
 
 
     /*Google Map 설정*/
-    /*val mapReadyCallback = object : OnMapReadyCallback {
+    val mapReadyCallback = object : OnMapReadyCallback {
         override fun onMapReady(map: GoogleMap) {
             googleMap = map
+            Log.d(TAG, "GoogleMap is ready")
 
-            *//*fragment 에 기록한 위치로  centerMarker 추가*//*
+            //*fragment 에 기록한 위치로  centerMarker 추가*//
+            val initLatLng = LatLng(37.606537, 127.041758)
+            centerMarker = addCenterMarker(initLatLng)
+            googleMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(initLatLng, 17f)
+            )
 
+            //*최종 위치 확인 후 해당 위치로 지도 및 centerMarker 이동*//
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if(location!=null){
+                    val last = LatLng(location.latitude, location.longitude)
 
-            *//*최종 위치 확인 후 해당 위치로 지도 및 centerMarker 이동*//*
+                    googleMap.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(last, 17f)
+                    )
 
+                    centerMarker.position = last
+                }
+            }
+            //최종 위치 확인 불가능
+            fusedLocationClient.lastLocation.addOnFailureListener {
+                Log.d(TAG, "최종 위치 없음")
+            }
 
         }
-    }*/
+    }
 
     /*centerMarker를 추가하는 함수 구현*/
-    /*private fun addCenterMarker(latLng: LatLng) {
+    private fun addCenterMarker(latLng: LatLng): Marker {
+        val markerOptions = MarkerOptions().apply {
+            position(latLng)
+            title("중심 위치")
+            snippet("center marker")
+            icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+        }
 
-    }*/
+        val marker = googleMap.addMarker(markerOptions)!!
+        marker.showInfoWindow()
+        return marker
+    }
 
 
     /*DB에 저장한 위치 정보를 사용하여 Marker 추가 함수 구현*/
