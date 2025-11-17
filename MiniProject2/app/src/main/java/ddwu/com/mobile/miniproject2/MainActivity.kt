@@ -50,6 +50,11 @@ class MainActivity : AppCompatActivity() {
     //마커
     lateinit var centerMarker: Marker
 
+    //geocoder
+    val geocoder: Geocoder by lazy{
+        Geocoder(this, Locale.getDefault())
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -69,11 +74,35 @@ class MainActivity : AppCompatActivity() {
 
         //현재 위치
         binding.btnCurrentLoc.setOnClickListener {
+            checkPermissions()
 
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallbackForMove, Looper.getMainLooper())
+
+            Log.d(TAG, "현재 위치 확인")
         }
 
+        //주소 위치 찾기
         binding.btnMoveLoc.setOnClickListener {
+            val address = binding.etAddress.text.toString()
 
+            if(address.isNotEmpty()){
+                geocoder.getFromLocationName(address, 1){ list ->
+                    if (list!=null && list.isNotEmpty()){
+                        val latlng = LatLng(list[0].latitude, list[0].longitude)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            googleMap.animateCamera(
+                                CameraUpdateFactory.newLatLngZoom(latlng, 17f)
+                            )
+
+                            centerMarker.position = latlng
+                        }
+
+                        Log.d(TAG, "주소 찾기 성공, 결과 ${list[0].latitude}. ${list[0].longitude}")
+                    }else{
+                        Log.d(TAG, "주소 없음")
+                    }
+                }
+            }
         }
 
         binding.btnSaveLoc.setOnClickListener {
@@ -116,10 +145,27 @@ class MainActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 val currentLoc : Location = locationResult.locations[0]
-                Log.d(TAG, "위도:${currentLoc.latitude} 경도: ${currentLoc.longitude}")
+                //Log.d(TAG, "위도:${currentLoc.latitude} 경도: ${currentLoc.longitude}")
             }
         }
     }
+
+    // 현재 위치 구현 [1-3]
+    val locationCallbackForMove = object : LocationCallback(){
+        override fun onLocationResult(locationResult: LocationResult) {
+            val currentLoc = locationResult.locations[0]
+            val latlng = LatLng(currentLoc.latitude, currentLoc.longitude)
+
+            googleMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(latlng, 17f)
+            )
+
+            centerMarker.position = latlng
+
+            fusedLocationClient.removeLocationUpdates(this)
+        }
+    }
+
 
 
     /*Google Map 설정*/
@@ -185,6 +231,8 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         /*위치 정보 조사 중단 코드 추가*/
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+        fusedLocationClient.removeLocationUpdates(locationCallbackForMove)
     }
 
 
