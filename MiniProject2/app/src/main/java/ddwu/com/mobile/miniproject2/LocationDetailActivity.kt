@@ -76,8 +76,6 @@ class LocationDetailActivity : AppCompatActivity() {
 
                 runOnUiThread { finish() }
             }
-
-            finish()
         }
 
 

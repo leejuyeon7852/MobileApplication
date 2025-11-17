@@ -29,9 +29,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import ddwu.com.mobile.miniproject2.data.MyLocDatabase
 import ddwu.com.mobile.miniproject2.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -123,14 +125,18 @@ class MainActivity : AppCompatActivity() {
 
 
         /*마커 표시 함수 호출*/
+        //추가한 마커 보기
         binding.btnShowMarkers.setOnClickListener {
-            //readMarker()
+            readMarker()
         }
 
+        //마커 삭제
         binding.btnClearMarkers.setOnClickListener {
             // 모든 마커 삭제
+            googleMap.clear()
 
             // 현재의 centerMarker 위치에 새롭게 centerMarker 추가
+            centerMarker = addCenterMarker(centerMarker.position)
         }
 
         // 실행 시 위치서비스 관련 권한 확인
@@ -219,15 +225,35 @@ class MainActivity : AppCompatActivity() {
 
 
     /*DB에 저장한 위치 정보를 사용하여 Marker 추가 함수 구현*/
-    /*private fun readMarker() {
+    private fun readMarker() {
         if (googleMap != null) {
             CoroutineScope(Dispatchers.IO).launch {
                 // DB의 정보로 Marker 추가 코드 구현
+                val locDao = MyLocDatabase.getInstance(this@MainActivity).myLocDao()
 
+                locDao.getAllLoc().distinctUntilChanged().collect {
+                    list -> withContext(Dispatchers.Main){
+                        for (loc in list){
+                            if (loc.locLat!=null && loc.locLng!=null){
+                                val pos = LatLng(loc.locLat!!, loc.locLng!!)
+
+                                val markerOptions = MarkerOptions().apply{
+                                    position(pos)
+                                    title(loc.locTitle)
+                                    snippet(loc.locAddress)
+                                    icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                                }
+
+                                googleMap.addMarker(markerOptions)
+                            }
+                        }
+                    }
+                    return@collect
+                }
 
             }
         }
-    }*/
+    }
 
 
     override fun onPause() {
