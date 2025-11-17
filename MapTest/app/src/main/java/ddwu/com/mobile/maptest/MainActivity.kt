@@ -4,6 +4,7 @@ import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
@@ -30,18 +31,25 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import ddwu.com.mobile.maptest.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     val TAG= "MAP_TEST"
     lateinit var binding: ActivityMainBinding
-
-
     lateinit var googleMap: GoogleMap
+
     lateinit var locClient: FusedLocationProviderClient
     lateinit var currentLoc : Location  // 현재 위치 보관용
     var centerMarker : Marker? = null   // 중심 Marker 보관용
     lateinit var currentLine: Polyline  // 그리기 선 보관용
 
+    val geocoder by lazy {
+        Geocoder(this, Locale.getDefault())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,18 +62,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // GoogleMap 객체 준비
-        val mapFragment =
-
-        mapFragment.
-
-
+        // LocationProviderClient 준비 (위치 확인)
         locClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // GoogleMap 객체 준비
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync (mapReadyCallback)
+
 
         binding.btnMove.setOnClickListener {
             val targetLoc = LatLng(37.602556, 127.041632)
             // 지도 표시 위치 변경
-
+//            googleMap.moveCamera( CameraUpdateFactory.newLatLngZoom(targetLoc, 17f) )
+            googleMap.animateCamera( CameraUpdateFactory.newLatLngZoom(targetLoc, 17f) )
         }
 
         binding.btnStart.setOnClickListener {
@@ -76,96 +85,127 @@ class MainActivity : AppCompatActivity() {
         binding.btnStop.setOnClickListener {
             locClient.removeLocationUpdates (locCallback)
         }
+
     }
 
-
+    /*Googlemap 객체 로딩 및 필요 기능 추가*/
     val mapReadyCallback = object : OnMapReadyCallback {
         override fun onMapReady(map: GoogleMap) {
             // 로딩한 map 을 멤버변수에 보관
+            googleMap = map
+            Log.d(TAG, "GoogleMap is ready")
 
-
-            /*locClient.lastLocation.addOnSuccessListener { location: Location? ->
+            // 최종 위치 확인 후 필요한 작업 수행
+            locClient.lastLocation.addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     googleMap.moveCamera(
                         CameraUpdateFactory.newLatLngZoom(
                             LatLng(location.latitude, location.longitude), 17f
                         )
                     )
+                    addCenterMarker( LatLng(location.latitude, location.longitude))
+
                 }
             }
             locClient.lastLocation.addOnFailureListener {
-                googleMap.moveCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(37.606320, 127.041808), 17f
-                    )
-                )
-            }*/
+                val latLng = LatLng(37.606320, 127.041808)
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
+                addCenterMarker( latLng)
+            }
 
-            /*googleMap.setOnMapClickListener { latLng : LatLng ->
+            googleMap.setOnMapClickListener { latLng : LatLng ->
                 Log.d(TAG, "클릭 위치 위도: ${latLng.latitude}, 경도: ${latLng.longitude}")
-            }*/
-
-            /*googleMap.setOnMapLongClickListener { latLng : LatLng ->
+            }
+            googleMap.setOnMapLongClickListener { latLng : LatLng ->
                 Log.d(TAG, "롱클릭 위치 위도: ${latLng.latitude}, 경도: ${latLng.longitude}")
-            }*/
+                addMarker(latLng)
+            }
 
-            /*googleMap.setOnMarkerClickListener { marker : Marker ->
+            googleMap.setOnMarkerClickListener { marker : Marker ->
                 Log.d(TAG, "마커 클릭: ${marker.tag} : (${marker.position}) ")
                 false
-            }*/
+            }
 
-            /*googleMap.setOnInfoWindowClickListener { marker: Marker ->
+            googleMap.setOnInfoWindowClickListener { marker: Marker ->
                 Log.d(TAG, "${marker.id}")
-            }*/
+            }
 
             /*수신한 위치들을 연결한 선을 그릴 경우 필요 코드 추가*/
-
-
+            val polylineOptions = PolylineOptions().apply {
+                color (Color.RED)
+                width (5f)
+            }
+            currentLine = googleMap.addPolyline(polylineOptions)
         }
     }
+
 
     /*위치 정보 수신*/
     val locCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
-            // 현재 위치로 지도 표시
-
+            currentLoc = result.locations[0]
+            val targetLoc = LatLng(currentLoc.latitude, currentLoc.longitude)
+            googleMap.animateCamera( CameraUpdateFactory.newLatLngZoom(targetLoc, 17f) )
+            centerMarker?.position = targetLoc
+            drawLine(targetLoc)
         }
     }
 
-
-
+    /*위치 정보 수신 요청 준비*/
     val locRequest = LocationRequest.Builder(5000)
         .setMinUpdateIntervalMillis(3000)
         .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
         .build()
 
 
+    /*Marker 추가 함수*/
     private fun addMarker( latLng : LatLng ) {
         val markerOptions = MarkerOptions().apply {
             position(latLng)        // Marker 표시 위치
             title("Marker Title")   // Marker Window 제목
-            snippet("Marker Description")  // Marker Window 설명
-            icon (BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+//            snippet("Marker Description")  // Marker Window 설명
+            icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
             // Marker Icon
             // icon (BitmapDescriptorFactory.fromResource(R.drawable.somsom))
         }
 
-        // Marker 추가 및 설정
+        val currnetMarker: Marker? = googleMap.addMarker(markerOptions)
+        currnetMarker?.tag = "database_id"
 
+        /*마커 추가 시 마커 위치의 주소 기록*/
+        geocoder.getFromLocation(latLng.latitude, latLng.longitude, 5) { addresses ->
+            CoroutineScope(Dispatchers.Main).launch {
+                currnetMarker?.snippet = addresses[0].getAddressLine(0)
+                currnetMarker?.showInfoWindow()
+            }
+        }
     }
 
+    /*선 그리기 점 추가 함수*/
     private fun drawLine (latLng: LatLng) {
         val points = currentLine.points
         points.add(latLng)
         currentLine.points = points
     }
 
+    /*센터 마커 추가용 함수*/
+    private fun addCenterMarker(latLng: LatLng) {
+        /*센터 마커 추가*/
+        val markerOptions = MarkerOptions().apply {
+            position(latLng)        // Marker 표시 위치
+            title("현재 위치")
+            icon (BitmapDescriptorFactory.fromResource(R.drawable.somsom))
+        }
+
+        centerMarker = googleMap.addMarker(markerOptions)
+    }
+
+
 
     override fun onPause() {
         super.onPause()
         locClient.removeLocationUpdates (locCallback)
     }
-
 
     /*위치 정보 권한 처리*/
     private fun checkPermissions() {    // 권한 확인이 필요한 곳에서 호출
