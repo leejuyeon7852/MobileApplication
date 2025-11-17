@@ -40,44 +40,76 @@ class LocationDetailActivity : AppCompatActivity() {
             insets
         }
 
+        locDao = MyLocDatabase.getInstance(this).myLocDao()
+
+        //[5] 위치 수정 & 상세 정보
+        val locId = intent.getLongExtra("id", -1)
         //[2-1] 위치 저장 구현
         val lat = intent.getDoubleExtra("lat", 0.0)
         val lng = intent.getDoubleExtra("lng", 0.0)
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val result = geocoder.getFromLocation(lat, lng, 1)
-            if (result!=null && result.isNotEmpty()){
-                val address = result[0].getAddressLine(0)
-                CoroutineScope(Dispatchers.Main).launch {
-                    binding.etLocAddress.setText(address)
+        if (locId <= 0){
+            CoroutineScope(Dispatchers.IO).launch {
+                val result = geocoder.getFromLocation(lat, lng, 1)
+                if (result!=null && result.isNotEmpty()){
+                    val address = result[0].getAddressLine(0)
+                    CoroutineScope(Dispatchers.Main).launch {
+                        binding.etLocAddress.setText(address)
+                    }
+                }
+
+            }
+
+        }
+
+        if (locId > 0) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val loc = locDao.getLocById(locId)
+
+                runOnUiThread {
+                    binding.etLocTitle.setText(loc.locTitle)
+                    binding.etLocAddress.setText(loc.locAddress)
+                    binding.etLocMemo.setText(loc.locMemo)
+                }
+
+                //수정
+                binding.btnDetailSave.setOnClickListener {
+                    val updated = loc.copy(
+                        locTitle = binding.etLocTitle.text.toString(),
+                        locAddress = binding.etLocAddress.text.toString(),
+                        locMemo = binding.etLocMemo.text.toString()
+                    )
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        locDao.updateLoc(updated)
+                        finish()
+                    }
                 }
             }
+        } else {
+            //[3] 장소 정보 저장
+            binding.btnDetailSave.setOnClickListener {
+                val title = binding.etLocTitle.text.toString()
+                val address = binding.etLocAddress.text.toString()
+                val memo = binding.etLocMemo.text.toString()
 
-        }
+                val locDB = MyLocDatabase.getInstance(this).myLocDao()
 
-        //[3] 장소 정보 저장
-        binding.btnDetailSave.setOnClickListener {
-            val title = binding.etLocTitle.text.toString()
-            val address = binding.etLocAddress.text.toString()
-            val memo = binding.etLocMemo.text.toString()
+                CoroutineScope(Dispatchers.IO).launch {
+                    val loc = MyLoc(
+                        locTitle = title,
+                        locAddress = address,
+                        locMemo = memo,
+                        locLat = lat,
+                        locLng = lng
+                    )
 
-            val locDB = MyLocDatabase.getInstance(this).myLocDao()
+                    locDB.insertLoc(loc)
 
-            CoroutineScope(Dispatchers.IO).launch {
-                val loc = MyLoc(
-                    locTitle = title,
-                    locAddress = address,
-                    locMemo = memo,
-                    locLat = lat,
-                    locLng = lng
-                )
-
-                locDB.insertLoc(loc)
-
-                runOnUiThread { finish() }
+                    runOnUiThread { finish() }
+                }
             }
         }
-
 
         binding.btnDetailCancel.setOnClickListener {
             finish()
