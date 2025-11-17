@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         /*구글 지도 객체 로딩 코드 작성*/
 
 
+
         binding.btnCurrentLoc.setOnClickListener {
 
         }

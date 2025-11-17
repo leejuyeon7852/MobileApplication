@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     /*ROOM dependency 관련 정보 추가*/
+    id("com.google.devtools.ksp") version "2.0.21-1.0.27"
 }
 
 android {
@@ -50,8 +51,15 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Google play service 위치 관련 정보 추가
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
     
-    // GoogleMap 관련 정보 추가 
+    // GoogleMap 관련 정보 추가
+    implementation("com.google.android.gms:play-services-maps:19.2.0")
 
     /*ROOM dependency 관련 정보 추가*/
+    val room_version = "2.7.2"
+
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation("androidx.room:room-ktx:$room_version") // Coroutine + Flow 지원
+    ksp("androidx.room:room-compiler:$room_version")
 }

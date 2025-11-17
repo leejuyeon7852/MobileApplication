@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--위치 권한 관련 정보 추가-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:allowBackup="true"
@@ -21,9 +23,9 @@
             android:exported="false" />
 
         <!--GoogleMap API 관련 정보 추가-->
-        <!--<meta-data
+        <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="Your Google Map API Key" />-->
+            android:value="AIzaSyDthqSimeL_7ZPY64lW_pOPreS5wRRiLpk" />
 
         <activity
             android:name=".MainActivity"
