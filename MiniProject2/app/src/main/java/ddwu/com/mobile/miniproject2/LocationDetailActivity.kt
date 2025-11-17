@@ -7,7 +7,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.room.Room
 import com.google.android.gms.maps.model.LatLng
+import ddwu.com.mobile.miniproject2.data.MyLoc
+import ddwu.com.mobile.miniproject2.data.MyLocDao
+import ddwu.com.mobile.miniproject2.data.MyLocDatabase
 import ddwu.com.mobile.miniproject2.databinding.ActivityLocationDetailBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +27,7 @@ class LocationDetailActivity : AppCompatActivity() {
         Geocoder(this, Locale.getDefault())
     }
 
+    lateinit var locDao: MyLocDao
     val binding by lazy { ActivityLocationDetailBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,8 +55,27 @@ class LocationDetailActivity : AppCompatActivity() {
 
         }
 
+        //[3] 장소 정보 저장
         binding.btnDetailSave.setOnClickListener {
+            val title = binding.etLocTitle.text.toString()
+            val address = binding.etLocAddress.text.toString()
+            val memo = binding.etLocMemo.text.toString()
 
+            val locDB = MyLocDatabase.getInstance(this).myLocDao()
+
+            CoroutineScope(Dispatchers.IO).launch {
+                val loc = MyLoc(
+                    locTitle = title,
+                    locAddress = address,
+                    locMemo = memo,
+                    locLat = lat,
+                    locLng = lng
+                )
+
+                locDB.insertLoc(loc)
+
+                runOnUiThread { finish() }
+            }
 
             finish()
         }
