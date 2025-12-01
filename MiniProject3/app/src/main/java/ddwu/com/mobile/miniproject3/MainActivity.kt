@@ -56,6 +56,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnAdd.setOnClickListener {
             /*AddMemoActivity 실행*/
+            val intent = Intent(this, AddMemoActivity::class.java)
+            startActivity(intent)
         }
 
         memoAdapter.setOnItemClickListener(object: MemoAdapter.OnItemClickListener {

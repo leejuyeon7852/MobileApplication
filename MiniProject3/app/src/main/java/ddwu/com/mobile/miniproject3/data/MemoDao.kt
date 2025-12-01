@@ -23,5 +23,5 @@ interface MemoDao {
     fun getAllMemo(): Flow<List<Memo>>
 
     @Query("select * from memo_table where _id= :id")
-    fun getMemoById(id: Int)
+    fun getMemoById(id: Int): Flow<Memo?>
 }
