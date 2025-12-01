@@ -60,14 +60,23 @@ class AddMemoActivity : AppCompatActivity() {
         }
 
         binding.btnSave.setOnClickListener {
-            val newMemo =
-
-            finish()
+            val newMemo = Memo(
+                0,
+                binding.etTitle.text.toString(),
+                binding.etContents.text.toString(),
+                currentPhotoPath.toString()
+            )
+            CoroutineScope(Dispatchers.IO).launch {
+                memoDao.addMemo(newMemo)
+                finish()
+            }
         }
 
         binding.btnCancel.setOnClickListener {
+            removeCurrentImage()
 
-
+            binding.etTitle.setText("")
+            binding.etContents.setText("")
 
             finish()
         }
