@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val callSubActivityRequest = registerForActivityResult(
+    val callSubActivityRequest = registerForActivityResult( //새로운 방식
         ActivityResultContracts.StartActivityForResult(), {
             result ->
             if (result.resultCode == RESULT_OK) {

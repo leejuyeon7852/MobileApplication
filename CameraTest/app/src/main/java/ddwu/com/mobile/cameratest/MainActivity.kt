@@ -23,8 +23,8 @@ class MainActivity : AppCompatActivity() {
     val TAG="MainActivity"
     val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
-//    private var currentPhotoUri: Uri? = null    // 촬영 또는 선택한 사진의 URI를 저장할 변수
-//    private var currentPhotoPath: String? = null  // 현재 사진 파일의 경로를 저장할 변수
+    private var currentPhotoUri: Uri? = null    // 촬영 또는 선택한 사진의 URI를 저장할 변수
+    private var currentPhotoPath: String? = null  // 현재 사진 파일의 경로를 저장할 변수
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,27 +54,75 @@ class MainActivity : AppCompatActivity() {
 
     /*카메라 Intent를 호출하여 사진 촬영을 시작*/
     private fun dispatchTakePictureIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
+        //카메라 앱을 처리할 수 있는 컴포넌트가 있는지 확인
+        if(takePictureIntent.resolveActivity(packageManager)!=null){
+            val photoFile: File? = try{ //사진을 저장할 파일 생성
+                val file = FileUtil.createNewFile(this)
+                currentPhotoPath = file.absolutePath
+                file
+            } catch (e: IOException){
+                Log.e(TAG, "이미지 파일 생성 오류", e)
+                null
+            }
 
+            photoFile?.also{
+                val photoURI: Uri = FileProvider.getUriForFile(
+                    this,
+                    "${application.packageName}.fileprovider",
+                    it
+                )
+                currentPhotoUri = photoURI
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                takePictureLauncher.launch(takePictureIntent)
+            }
+        }else{
+            Log.e(TAG, "카메라 앱 미확인")
+        }
 
     }
 
 
     /*카메라 호출 및 결과 처리를 위한 ActivityResultLauncher*/
-//    private val takePictureLauncher =
+    private val takePictureLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == RESULT_OK){
+            displayImage(currentPhotoUri!!)
+        }else{
+            Toast.makeText(this, "사진 촬영 취소", Toast.LENGTH_SHORT).show()
+            removeCurrentImage()
+        }
+    }
 
 
 
     /*uri에 저장된 이미지를 ImageView에 표시*/
     private fun displayImage(uri: Uri?) {
-
-
+        try {
+            uri?.also {
+                Glide.with(this).load(uri).into(binding.imageView)
+            }
+        }catch (e: Exception){
+            Log.e(TAG, "이미지 확인 불가:  $uri", e)
+        }
     }
 
 
     /*currentPhotoPath 의 이미지 삭제 및 초기화*/
     private fun removeCurrentImage() {
-
+        try{
+            val isRemoved = FileUtil.deleteFile(currentPhotoPath)
+            if (isRemoved){
+                Glide.with(this)
+                    .load(android.R.drawable.ic_menu_camera)
+                    .into(binding.imageView)
+                currentPhotoUri = null
+                currentPhotoPath = null
+            }
+        }catch (e: IOException){
+            Log.e(TAG, "이미지 삭제 오류", e)
+        }
 
     }
 
@@ -88,6 +136,7 @@ class MainActivity : AppCompatActivity() {
 //                currentPhotoUri = uri
 //                displayImage(currentPhotoUri) // 선택된 이미지 확인 (ImageView에 표시)
 //                currentPhotoPath = FileUtil.saveFileToExtStorage(this, currentPhotoUri)
+//                Toast.makeText(this, "사진을 가져왔습니다.", Toast.LENGTH_SHORT).show()
 //            }
 //        } else {
 //            Toast.makeText(this, "사진 선택 취소", Toast.LENGTH_SHORT).show()
@@ -96,7 +145,18 @@ class MainActivity : AppCompatActivity() {
 
 
     /*갤러리 앱 실행*/
-//    val pickImageLauncher =
+    val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()){ uri:Uri? ->
+        if(uri!=null) {
+            Glide.with(this).load(uri).into(binding.imageView)
+
+            currentPhotoUri = uri
+            currentPhotoPath = FileUtil.saveFileToExtStorage(this, currentPhotoUri)
+            Toast.makeText(this, "사진을 가져왔습니다.", Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(this, "사진 선택 취소", Toast.LENGTH_SHORT).show()
+        }
+    }
 
 
 
@@ -104,6 +164,7 @@ class MainActivity : AppCompatActivity() {
     private fun openGallery() {
 //        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
 //        pickImageLauncher.launch(intent)
+        pickImageLauncher.launch("image/*")
 
     }
 
