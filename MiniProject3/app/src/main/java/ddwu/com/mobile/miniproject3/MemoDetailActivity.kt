@@ -8,7 +8,11 @@ import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 //import com.bumptech.glide.Glide
 import ddwu.com.mobile.miniproject3.data.Memo
+import ddwu.com.mobile.miniproject3.data.MemoDatabase
 import ddwu.com.mobile.miniproject3.databinding.ActivityMemoDetailBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.getValue
 
@@ -49,12 +53,16 @@ class MemoDetailActivity : AppCompatActivity() {
 
         binding.btnUpdate.setOnClickListener {
             val updateMemo = Memo(
-                0,
+                memo._id,
                 binding.etTitle.text.toString(),
                 binding.etContents.text.toString(),
                 memo.imagePath
             )
-            finish()
+            CoroutineScope(Dispatchers.IO).launch {
+                val memoDao = MemoDatabase.getInstance(this@MemoDetailActivity).getMemoDao()
+                memoDao.updateMemo(updateMemo)
+                finish()
+            }
         }
 
         binding.btnCancel.setOnClickListener {
