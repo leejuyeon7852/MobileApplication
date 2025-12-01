@@ -4,6 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 //import com.bumptech.glide.Glide
 //import com.bumptech.glide.load.engine.DiskCacheStrategy
 import ddwu.com.mobile.miniproject3.data.Memo
@@ -30,14 +32,14 @@ class MemoAdapter() : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
         position: Int
     ) {
 
-        /*holder.memoItemBinding.tvTitle.text = memos?.get(position)?.title ?: ""
+        holder.memoItemBinding.tvTitle.text = memos?.get(position)?.title ?: ""
 
         Glide.with(holder.memoItemBinding.clItem.context)
             .load(File(memos?.get(position)?.imagePath ?: ""))
             .placeholder(android.R.drawable.ic_menu_gallery)
             .thumbnail(0.1f)
             .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-            .into(holder.memoItemBinding.ivMemo)*/
+            .into(holder.memoItemBinding.ivMemo)
 
         holder.memoItemBinding.clItem.setOnClickListener{   // 항목 클릭 이벤트 처리
             clickListener?.onItemClick(it, position)
