@@ -13,7 +13,7 @@ import java.io.File
 
 class MemoAdapter() : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
 
-    var memos: List<Memo>? = null
+    var memos: List<Memo>? = listOf()
 
     override fun getItemCount() = memos?.size ?: 0
 
