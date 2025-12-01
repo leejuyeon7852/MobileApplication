@@ -1,0 +1,28 @@
+package ddwu.com.mobile.miniproject3.data
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+/*Memo Database 구현*/
+
+/*
+abstract class MemoDatabase : RoomDatabase() {
+    abstract fun getMemoDao() : MemoDao
+
+    companion object {
+        @Volatile private var INSTANCE : MemoDatabase? = null
+
+        fun getInstance(context: Context) : MemoDatabase =
+            INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    MemoDatabase::class.java,
+                    "memo_database.db").build()
+                INSTANCE = instance
+                instance
+            }
+    }
+}
+*/
