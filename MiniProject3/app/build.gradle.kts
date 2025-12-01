@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-//    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -50,10 +50,10 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Glide
-//    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
     // ROOM
-//    val room_version = "2.7.2"
-//    implementation("androidx.room:room-runtime:$room_version")
-//    ksp("androidx.room:room-compiler:$room_version")
+    val room_version = "2.7.2"
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
 }

@@ -8,7 +8,20 @@ import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 /*Memo Dao 구현*/
-
+@Dao
 interface MemoDao {
+    @Insert
+    suspend fun addMemo(memo: Memo)
 
+    @Update
+    suspend fun updateMemo(memo: Memo)
+
+    @Delete
+    suspend fun deleteMemo(memo: Memo)
+
+    @Query("select * from memo_table")
+    fun getAllMemo(): Flow<List<Memo>>
+
+    @Query("select * from memo_table where _id= :id")
+    fun getMemoById(id: Int)
 }

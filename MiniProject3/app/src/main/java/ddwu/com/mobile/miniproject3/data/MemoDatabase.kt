@@ -1,13 +1,14 @@
 package ddwu.com.mobile.miniproject3.data
 
 import android.content.Context
+import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
 /*Memo Database 구현*/
 
-/*
+@Database([Memo::class], version=1)
 abstract class MemoDatabase : RoomDatabase() {
     abstract fun getMemoDao() : MemoDao
 
@@ -25,4 +26,4 @@ abstract class MemoDatabase : RoomDatabase() {
             }
     }
 }
-*/
+
