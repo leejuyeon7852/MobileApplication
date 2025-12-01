@@ -3,6 +3,7 @@ package ddwu.com.mobile.miniproject3
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -15,9 +16,9 @@ import java.io.File
 
 class MemoAdapter() : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
 
-    var memos: List<Memo>? = listOf()
+    var memos: List<Memo> = emptyList()
 
-    override fun getItemCount() = memos?.size ?: 0
+    override fun getItemCount() = memos.size
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -44,6 +45,11 @@ class MemoAdapter() : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
         holder.memoItemBinding.clItem.setOnClickListener{   // 항목 클릭 이벤트 처리
             clickListener?.onItemClick(it, position)
         }
+
+        holder.memoItemBinding.clItem.setOnLongClickListener {
+            longClickListener?.onItemLongClick(it, position)
+            true
+        }
     }
 
     class MemoViewHolder(val memoItemBinding: MemoItemBinding) : RecyclerView.ViewHolder(memoItemBinding.root)
@@ -57,6 +63,15 @@ class MemoAdapter() : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
 
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.clickListener = listener
+    }
+
+    //롱클릭 시 삭제
+    interface OnItemLongClickListener{
+        fun onItemLongClick(view: View, position: Int)
+    }
+    var longClickListener: OnItemLongClickListener? = null
+    fun setOnItemLongClickListener(listener: OnItemLongClickListener){
+        this.longClickListener=listener
     }
 
 }

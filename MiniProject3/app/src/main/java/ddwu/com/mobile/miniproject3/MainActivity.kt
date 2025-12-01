@@ -1,11 +1,10 @@
 package ddwu.com.mobile.miniproject3
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -16,7 +15,6 @@ import ddwu.com.mobile.miniproject3.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -73,10 +71,28 @@ class MainActivity : AppCompatActivity() {
             override fun onItemClick(view: View, position: Int) {
                 /*position 위치의 Entitiy 를 memoAdapter.memos 에서 확인
                 * 해당 Entity 를 MemoDetailActivity로 전달*/
-                val memo = memoAdapter.memos?.get(position)
+                val memo = memoAdapter.memos[position]
                 val intent = Intent(this@MainActivity, MemoDetailActivity::class.java)
                 intent.putExtra("memo", memo)
                 startActivity(intent)
+            }
+        })
+
+        //롱클릭 시 삭제
+        memoAdapter.setOnItemLongClickListener(object: MemoAdapter.OnItemLongClickListener{
+            override fun onItemLongClick(view: View, position: Int) {
+                val memo = memoAdapter.memos[position]
+                AlertDialog.Builder(this@MainActivity).apply {
+                    setTitle("삭제 확인")
+                    setMessage("삭제하시겠습니까?")
+                    setPositiveButton("확인"){ _, _ ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            memoDao.deleteMemo(memo)
+                        }
+                    }
+                    setNegativeButton("취소", null)
+                    show()
+                }
             }
         })
     }
